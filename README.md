@@ -1,0 +1,64 @@
+# dotfiles
+
+Personal configuration, kept in one place and symlinked into position.
+
+## Layout
+
+```
+dotfiles/
+  doom/          Doom Emacs config  ->  ~/.config/doom
+  install.sh     creates the symlinks
+```
+
+## Install on a new machine
+
+```sh
+git clone git@github.com:tilakp/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./install.sh --dry     # see what it would do
+./install.sh
+```
+
+`install.sh` is safe to re-run. A symlink already pointing at the right place
+is left alone. A real file in the way is moved to
+`~/.dotfiles-backup/<timestamp>/` rather than deleted.
+
+## Adding something new
+
+Move the real file into the repo, then add one line to `LINKS` in
+`install.sh` and re-run it:
+
+```sh
+mkdir -p ~/dotfiles/zsh
+mv ~/.zshrc ~/dotfiles/zsh/.zshrc
+# in install.sh:  "zsh/.zshrc:$HOME/.zshrc"
+./install.sh
+```
+
+Nothing is tracked unless it is moved in deliberately. That matters, because
+several config directories hold credentials that must stay out of this repo:
+
+- `~/.config/gh` (GitHub auth token)
+- `~/.config/git` (may hold credential helper output)
+- `~/.ssh` (private keys)
+- `~/.aws`, `~/.docker` (session credentials)
+
+Check what you are about to add before adding it.
+
+## Doom Emacs
+
+Doom itself lives in `~/.config/emacs` and is not tracked here; only the
+user config is. After changing `init.el` or `packages.el`:
+
+```sh
+~/.config/emacs/bin/doom sync
+```
+
+Two things in `doom/` look like clutter but are not:
+
+- `themes/doom-nano-{light,dark}-theme.el` are deliberate copies. The
+  `doom-nano-themes` package directory is not on `custom-theme-load-path`,
+  and it ships a stale `.elc` that fails to load, so the theme files have to
+  be copied here. This is what that package's README instructs.
+- `nano-agenda.el` and `nano-calendar.el` are vendored, not packages.
+  `nano-agenda` is autoloaded from `config.el`.
