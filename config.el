@@ -307,18 +307,35 @@
    ;; Style for TODO keywords - will show as colored labels
    org-modern-keyword nil  ; Use default keyword styling
    
-   ;; Configure TODO keyword styles
+   ;; Configure TODO keyword styles.
+   ;; These name faces defined in nano-theme.el rather than raw colours, so
+   ;; they follow the light/dark theme instead of being pinned to one.
+   ;; Keywords are grouped by the decision they ask for, not by hue:
+   ;;   next    - act on this now
+   ;;   waiting - blocked on someone else, needs a nudge
+   ;;   open    - in the backlog (the default for anything unlisted)
+   ;;   later   - deliberately parked
+   ;;   done    - closed, should recede
    org-modern-todo t
    org-modern-todo-faces
-   '(("TODO" :background "#ff6c6b" :foreground "#282c34")
-     ("NEXT" :background "#2b81d6" :foreground "#000000")
-     ("WAITING" :background "#e6d925" :foreground "#282c34")
-     ("SOMEDAY" :background "#a9a1e1" :foreground "#282c34")
-     ("SCHEDULED" :background "#98be65" :foreground "#282c34")
-     ("LATER" :background "#c678dd" :foreground "#282c34")
-     ("PROJ" :background "#46D9FF" :foreground "#282c34")
-     ("DONE" :background "#98be65" :foreground "#282c34")
-     ("CANCELLED" :background "#5B6268" :foreground "#282c34"))
+   '(("NEXT"      . nano-label-next)
+     ("STRT"      . nano-label-next)
+     ("WIP"       . nano-label-next)
+     ("WAITING"   . nano-label-waiting)
+     ("WAIT"      . nano-label-waiting)
+     ("HOLD"      . nano-label-waiting)
+     ("DELG"      . nano-label-waiting)
+     ("FOLLOWUP"  . nano-label-waiting)
+     ("CONTACTED" . nano-label-waiting)
+     ("DISCUSS"   . nano-label-waiting)
+     ("SOMEDAY"   . nano-label-later)
+     ("LATER"     . nano-label-later)
+     ("IDEA"      . nano-label-later)
+     ("DONE"      . nano-label-done)
+     ("CANCELLED" . nano-label-done)
+     ("KILL"      . nano-label-done)
+     ("SKIP"      . nano-label-done)
+     (t           . nano-label-open))
    
    ;; Modern styling for other elements
    org-modern-star '("◉" "○" "◈" "◇" "✳")  ; Bullet styles for headlines

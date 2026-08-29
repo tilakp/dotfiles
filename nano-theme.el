@@ -136,6 +136,45 @@ before a graphical frame exists (for example under `emacs --daemon')."
   "Return the NANO palette that matches the active theme."
   (if (nano-theme-dark-p) nano-theme-dark nano-theme-light))
 
+;; --- Todo label palettes -------------------------------------------
+;; Each entry is (TIER BACKGROUND FOREGROUND). A nil background means the
+;; label sits directly on the page with no chip. The tiers descend in
+;; emphasis: next > waiting > open > later > done. Every pair clears WCAG
+;; AA (4.5:1) for its own text, so no label is harder to read than another.
+
+(defvar nano-labels-light
+  '((next    "#1d4ed8" "#ffffff")
+    (waiting "#a55206" "#ffffff")
+    (open    "#d5dae3" "#333b47")
+    (later   "#eceef2" "#5b6472")
+    (done    nil       "#6a727e"))
+  "Todo label colours used when a light theme is active.")
+
+(defvar nano-labels-dark
+  '((next    "#a9c9ea" "#1b212b")
+    (waiting "#d8b878" "#1b212b")
+    (open    "#4a5568" "#e5e9f0")
+    (later   "#3b4252" "#a7b3c4")
+    (done    nil       "#9aa8bc"))
+  "Todo label colours used when a dark theme is active.")
+
+(defface nano-label-next    '((t)) "Label for actionable tasks.")
+(defface nano-label-waiting '((t)) "Label for tasks blocked on someone else.")
+(defface nano-label-open    '((t)) "Label for open, unstarted tasks.")
+(defface nano-label-later   '((t)) "Label for deferred tasks.")
+(defface nano-label-done    '((t)) "Label for closed tasks.")
+
+(defun nano-install-labels ()
+  "Apply the todo label palette that matches the active theme."
+  (interactive)
+  (dolist (spec (if (nano-theme-dark-p) nano-labels-dark nano-labels-light))
+    (let ((face (intern (format "nano-label-%s" (nth 0 spec))))
+          (background (nth 1 spec))
+          (foreground (nth 2 spec)))
+      (set-face-attribute face nil
+                          :foreground foreground
+                          :background (or background 'unspecified)))))
+
 (defun nano-install-theme ()
   "Apply the NANO faces on top of the active theme."
   (interactive)
@@ -230,13 +269,20 @@ before a graphical frame exists (for example under `emacs --daemon')."
     ;; Org mode
     (nano-link-face '(nano-salient) '(org-link))
     (nano-link-face '(nano-faded)   '(org-document-info))
-    (nano-link-face '(nano-popout)  '(org-level-1))
-    (nano-link-face '(nano-strong)  '(org-level-2 org-level-3))))
+    ;; Every heading level gets the same colour. Depth is already carried
+    ;; by the org-modern bullets and by indentation, so colour stays
+    ;; reserved for todo state. This also rescues org-level-4 and deeper,
+    ;; which the theme left at #a0a0a0 (2.5:1 on white).
+    (nano-link-face '(nano-strong)  '(org-level-1 org-level-2 org-level-3
+                                      org-level-4 org-level-5 org-level-6
+                                      org-level-7 org-level-8))))
 
 ;; --- Theme initialization -------------------------------------------
 ;; Run after every `load-theme'/`enable-theme', so the NANO faces survive a
 ;; theme switch and follow the light/dark palette.
 (add-hook 'doom-load-theme-hook #'nano-install-theme)
+(add-hook 'doom-load-theme-hook #'nano-install-labels)
 (nano-install-theme)
+(nano-install-labels)
 
 (provide 'nano-theme)
