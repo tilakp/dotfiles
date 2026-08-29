@@ -144,25 +144,48 @@ before a graphical frame exists (for example under `emacs --daemon')."
 
 (defvar nano-labels-light
   '((next    "#1d4ed8" "#ffffff")
-    (waiting "#a55206" "#ffffff")
+    (meeting "#0f766e" "#ffffff")
+    (waiting "#f59e0b" "#3d2600")
     (open    "#d5dae3" "#333b47")
     (later   "#eceef2" "#5b6472")
-    (done    nil       "#6a727e"))
+    (done    "#e8eaee" "#616973"))
   "Todo label colours used when a light theme is active.")
 
 (defvar nano-labels-dark
   '((next    "#a9c9ea" "#1b212b")
+    (meeting "#8fc7bf" "#16221f")
     (waiting "#d8b878" "#1b212b")
     (open    "#4a5568" "#e5e9f0")
     (later   "#3b4252" "#a7b3c4")
-    (done    nil       "#9aa8bc"))
+    (done    "#3d4452" "#adbacc"))
   "Todo label colours used when a dark theme is active.")
 
 (defface nano-label-next    '((t)) "Label for actionable tasks.")
+(defface nano-label-meeting '((t)) "Label for scheduled meetings.")
 (defface nano-label-waiting '((t)) "Label for tasks blocked on someone else.")
 (defface nano-label-open    '((t)) "Label for open, unstarted tasks.")
 (defface nano-label-later   '((t)) "Label for deferred tasks.")
 (defface nano-label-done    '((t)) "Label for closed tasks.")
+
+(defcustom nano-org-metadata-height 0.82
+  "Text scale for org metadata: DEADLINE:/SCHEDULED:, drawers and timestamps.
+1.0 matches body text. Faces are reapplied on every theme change, because
+`load-theme' resets them."
+  :type 'number
+  :group 'nano)
+
+(defun nano-install-org-metadata ()
+  "Shrink org metadata so deadlines and logbook drawers stay out of the way."
+  (interactive)
+  (dolist (face '(org-special-keyword      ; DEADLINE: SCHEDULED: CLOSED:
+                  org-drawer               ; :LOGBOOK: :PROPERTIES: :END:
+                  org-property-value
+                  org-modern-date-active
+                  org-modern-date-inactive
+                  org-modern-time-active
+                  org-modern-time-inactive))
+    (when (facep face)
+      (set-face-attribute face nil :height nano-org-metadata-height))))
 
 (defun nano-install-labels ()
   "Apply the todo label palette that matches the active theme."
@@ -282,7 +305,14 @@ before a graphical frame exists (for example under `emacs --daemon')."
 ;; theme switch and follow the light/dark palette.
 (add-hook 'doom-load-theme-hook #'nano-install-theme)
 (add-hook 'doom-load-theme-hook #'nano-install-labels)
+(add-hook 'doom-load-theme-hook #'nano-install-org-metadata)
+;; org and org-modern both load lazily, after the theme. Until they do, their
+;; faces do not exist and `nano-install-org-metadata' silently skips them, so
+;; run it again once each is actually available.
+(with-eval-after-load 'org (nano-install-org-metadata))
+(with-eval-after-load 'org-modern (nano-install-org-metadata))
 (nano-install-theme)
 (nano-install-labels)
+(nano-install-org-metadata)
 
 (provide 'nano-theme)

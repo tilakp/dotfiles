@@ -64,6 +64,11 @@
 ;; Task dependencies - prevent marking parent as DONE if children aren't DONE
 (setq-default org-enforce-todo-dependencies t)
 
+;; MEET is used by the "Meetings" agenda group below. Files that carry their
+;; own #+SEQ_TODO line override this, so MEET is also added to those.
+(after! org
+  (add-to-list 'org-todo-keywords '(sequence "MEET(m)" "|" "DONE(d)") t))
+
 ;; Automatic blank lines before new entries
 (setq org-blank-before-new-entry '((heading) (plain-list-item)))
 
@@ -99,7 +104,7 @@
   "Set agenda focus to home-related org files."
   (interactive)
   (setq org-agenda-files '("~/org/home/home.org"
-                           "~/org/home/home_repair.org")))
+                           "~/org/home/home-repair.org")))
 
 (defun org-focus-work ()
   "Set agenda focus to work-related org files."
@@ -152,16 +157,16 @@
                             (:name "Due Today"
                                    :deadline today
                                    :order 2)
+                            (:name "Meetings"
+                                   :todo "MEET"
+                                   :order 3)
                             (:name "Scheduled Soon"
                                    :scheduled future
                                    :order 8)
                             (:name "Overdue"
                                    :deadline past
                                    :order 7)
-                            (:name "Meetings"
-                                   :and (:todo "MEET" :scheduled future)
-                                   :order 10)
-                            (:discard (:not (:todo "TODO")))))))))
+                            (:discard (:not (:todo ("TODO" "MEET"))))))))))
           ("n" "Nano Agenda"
            (lambda (&optional arg)
              (interactive)
@@ -319,6 +324,7 @@
    org-modern-todo t
    org-modern-todo-faces
    '(("NEXT"      . nano-label-next)
+     ("MEET"      . nano-label-meeting)
      ("STRT"      . nano-label-next)
      ("WIP"       . nano-label-next)
      ("WAITING"   . nano-label-waiting)
