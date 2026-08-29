@@ -370,6 +370,12 @@
 ;; Available themes for rotation
 (setq tp-doom-themes '("doom-nano-light" "doom-nano-dark"))
 
+;; NOTE The doom-nano-* theme files in ./themes/ are deliberate copies, not
+;; duplicates to clean up. doom-nano-themes' README tells you to copy them into
+;; $DOOMDIR/themes/, and the package's own build directory is not on
+;; `custom-theme-load-path'. It also carries a stale doom-nano-light-theme.elc
+;; that fails to load, so pointing at it directly does not work.
+
 ;; Load Nano theme
 (setq doom-theme 'doom-nano-light)
 
