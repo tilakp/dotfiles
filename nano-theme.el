@@ -27,8 +27,6 @@
 ;; which Doom applies after this file loads. Setting it here as well was dead
 ;; code that Doom overwrote every startup.
 (setq-default line-spacing 0.15)
-(set-face-attribute 'bold nil :weight 'regular)
-(set-face-attribute 'bold-italic nil :weight 'regular)
 
 ;; --- Frame / window layout & behavior ------------------------------
 (dolist (param '((height . 44) (width . 81) (left-fringe . 0) (right-fringe . 0)
@@ -154,7 +152,7 @@ before a graphical frame exists (for example under `emacs --daemon')."
     (nano-set-face 'nano-faded (alist-get 'faded palette) nil)
     (nano-set-face 'nano-salient (alist-get 'salient palette) nil)
     (nano-set-face 'nano-popout (alist-get 'popout palette) nil)
-    (nano-set-face 'nano-strong (alist-get 'strong palette) nil 'bold)
+    (nano-set-face 'nano-strong (alist-get 'strong palette) nil)
     (nano-set-face 'nano-critical (alist-get 'critical palette) nil)
     
     ;; Mode and header lines
@@ -200,6 +198,9 @@ before a graphical frame exists (for example under `emacs --daemon')."
                       :foreground 'unspecified)
     
     (set-face-attribute 'bold nil
+                      :weight 'bold)
+
+    (set-face-attribute 'bold-italic nil
                       :weight 'bold)
 
     ;; Font lock faces

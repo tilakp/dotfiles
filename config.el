@@ -25,9 +25,9 @@
 
 ;; Set fonts: Roboto Mono for code, Amazon Ember for variable pitch
 ;; NOTE `:size' with a float is a point size; an integer is a pixel size.
-(setq doom-font (font-spec :family "Roboto Mono" :size 14.0 :weight 'light)
+(setq doom-font (font-spec :family "Roboto Mono" :size 14.0 :weight 'medium)
       doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14.0)
-      doom-big-font (font-spec :family "Roboto Mono" :size 18.0 :weight 'light))
+      doom-big-font (font-spec :family "Roboto Mono" :size 18.0 :weight 'medium))
 
 ;; If you want to adjust font size on the fly:
 ;; Use `C-x C-+` or `SPC z +` to increase
