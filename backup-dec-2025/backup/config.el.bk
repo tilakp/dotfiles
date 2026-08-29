@@ -1,0 +1,357 @@
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Your Name"
+      user-mail-address "you@example.com")
+
+(display-time-mode 1)
+(setq display-time-day-and-date t)
+(global-auto-revert-mode 1)
+(setq undo-limit 80000000
+      evil-want-fine-undo t
+      auto-save-default nil
+      inhibit-compacting-font-caches t)
+(whitespace-mode -1)
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
+;; :family "monospace" :family "sans"
+;; (setq doom-font (font-spec :family "SauceCodePro Nerd Font Mono" :size 12 :weight 'semi-light)
+;;        doom-variable-pitch-font (font-spec :family "iMWritingDuoS Nerd Font" :size 13 :weight 'semi-light))
+
+
+;; This is so I cannot set a headline to DONE if children aren’t DONE.
+(setq-default org-enforce-todo-dependencies t)
+
+;; setting up some shortcuts 
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key (kbd "<f6>") 'org-capture)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/org/")
+(setq org-roam-directory "~/org/roam/")
+
+;; some useful utilities from https://blog.aaronbieber.com/2016/01/30/dig-into-org-mode.html
+;; This causes Org to automatically place a blank line before a new heading or plain text list item
+(setq org-blank-before-new-entry (quote ((heading) (plain-list-item))))
+;; it forces you to mark all child tasks as “DONE” before you can mark the parent as “DONE.”
+(setq org-enforce-todo-dependencies t)
+;; Setting this option causes Org to insert an annotation in a task when it is marked as
+;; done including a timestamp of when exactly that happened.
+(setq org-log-done (quote time))
+;; this option causes Org to insert annotations when you change the deadline of a task
+(setq org-log-redeadline (quote time))
+;; This does the same as above, but for the scheduled dates
+(setq org-log-reschedule (quote time))
+
+;; set up ispell for flychecker https://emacs.stackexchange.com/questions/19175/where-is-ispell
+;; (setq ispell-program-name "/usr/local/bin/ispell")
+
+;; custom clocking drawer
+(setq org-clock-into-drawer "TIME")
+(setq org-archive-location "%s_archive::")
+
+;; separate agenda files for home stuff and work stuff 
+(defun org-focus-home() "Set focus on home stuff." 
+  (interactive)
+  (setq org-agenda-files '("~/org/home/home.org" 
+			   "~/org/home/home_repair.org"))
+  )
+
+(defun org-focus-work() "Set focus on work stuff." 
+  (interactive)
+  (setq org-agenda-files '("~/org/work/work.org")))
+
+
+;; capture templates, very much work in progress
+;; learned about doct and all-the-icons from https://www.reddit.com/r/emacs/comments/fzuv4f/my_prettified_orgcapture/ 
+;; specific diff: https://github.com/tecosaur/emacs-config/compare/6bcdbaa..49c790e 
+;; complete config: https://github.com/tecosaur/emacs-config/blob/43a19e7f785e70ee6717131437b0d91657ddc334/config.el#L720
+;; doct documentation: https://github.com/progfolio/doct 
+;; and all the icons can be found on https://github.com/domtronn/all-the-icons.el/blob/master/data/data-octicons.el 
+(after! org-capture
+  (setq org-capture-templates
+        (doct `(
+                    (,(format "%s\thome capture" (all-the-icons-octicon "home" :face 'all-the-icons-green :v-adjust 0.01))
+                                :keys "h"
+                                :file "~/org/home/home.org"
+                                :prepend t
+                                :children
+                                ((,(format "%s\thome todo" (all-the-icons-octicon "checklist" :face 'all-the-icons-green :v-adjust 0.01))
+        	                         :keys "t"
+                	                 :headline   "Inbox"
+                  	                 :todo-state "TODO"
+                                         :template-file "~/org/templates/tpl-todo.txt")
+				                 (,(format "%s\tEmail" (all-the-icons-faicon "envelope" :face 'all-the-icons-blue :v-adjust 0.01))
+				   	                 :keys "e"
+				   	                 :prepend t
+				   	                 :headline "Inbox"
+				   	                 :type entry
+					                 :template-file "~/org/templates/tpl-email.txt")
+                                 (,(format "%s\tjournal entry" (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01))
+					                 :keys "j"
+				                     :file "~/org/home/home-journal.org"
+				                     :datetree t
+				                     :template "* %U - %^{Activity}")
+                                 (,(format "%s\tcapture email" (all-the-icons-faicon "envelope" :face 'all-the-icons-yellow :v-adjust 0.01))
+                                          :keys "e"
+                                          :file "~/org/home/home.org"
+                                          :prepend t
+                                          :template-file "~/org/templates/tpl-email.txt")
+                                 )
+                    )
+                    (,(format "%s\twork capture" (all-the-icons-octicon "briefcase" :face 'all-the-icons-red :v-adjust 0.01))
+                                :keys "w"
+                                :file "~/org/work/work.org"
+                                :prepend t
+                                :children
+                                ((,(format "%s\twork todo" (all-the-icons-octicon "checklist" :face 'all-the-icons-green :v-adjust 0.01))
+                                          :keys "t"
+                                          :headline "Inbox"
+                                          :todo-state "TODO"
+                                          :template-file "~/org/templates/tpl-todo.txt")
+				                 (,(format "%s\tjournal entry" (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01)) 
+					                      :keys "j"
+					                      :file "~/org/work/work-journal.org"
+				 	                      :datetree t
+				  	                      :template "* %U - %?")
+                                 (,(format "%s\tcapture email" (all-the-icons-faicon "envelope" :face 'all-the-icons-yellow :v-adjust 0.01))
+                                          :keys "e"
+                                          :file "~/org/work/work.org"
+                                          :prepend t
+                                          :template-file "~/org/templates/tpl-email.txt")
+                                 )
+                    )
+                    (,(format "%s\tbook to read" (all-the-icons-octicon "book" :face 'all-the-icons-green :v-adjust 0.02))
+                                :keys "b"
+                                :file "~/org/books.org"
+                                :headline "Books to read"
+                                :prepend t
+                                :template-file "~/org/templates/tpl-book.txt")
+                    (,(format "%s\tideas" (all-the-icons-faicon "lightbulb-o" :face 'all-the-icons-yellow :v-adjust 0.02))
+                                :keys "i"
+                                :file "~/org/ideas.org"
+                                :headline "Ideas"
+                                :prepend t
+                                :template-file "~/org/templates/tpl-idea.txt")
+			        (,(format "%s\tthoughts/observations" (all-the-icons-faicon "bolt" :face 'all-the-icons-yellow :v-adjust 0.01))
+                                :keys "o"
+                                :file "~/org/thoughts-and-observations-journal.org"
+                                :datetree t
+                                :template "* %U - %?")
+ 
+		))
+
+  )
+)
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
+
+;; customize start up windows 
+;; taken from https://blog.sumtypeofway.com/posts/emacs-config.html
+;;(defun my-default-window-setup ()
+;;  "Called by emacs-startup-hook to set up my initial window configuration."
+;;
+;;  (split-window-right)
+;;  (other-window 1)
+;;  (find-file "~/org/home/home.org")
+;;  (other-window 1))
+;;
+;;(add-hook 'emacs-startup-hook #'my-default-window-setup)
+
+(setq doom-font (font-spec :family "Roboto Mono" :size 14 :weight 'semi-light)
+       doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14 :weight 'semi-light))
+
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default: doom-ephemeral
+;; (setq doom-theme 'nano-dark)
+(after! doom-themes
+  (load-theme 'doom-nano-light t))
+
+(use-package! doom-nano-modeline
+  :config
+  (doom-nano-modeline-mode 1)
+  (global-hide-mode-line-mode 1))
+
+;; picked up from https://github.com/nmartin84/.doom.d/blob/master/config.el
+;; (setq tp-doom-themes '("nano-light" "nano-dark" "doom-ayu-light" "doom-plain" "doom-rouge" "doom-badger" "doom-challenger-deep" "doom-snazzy"  "doom-solarized-light" "doom-ephemeral" "doom-nord-light" "doom-spacegrey" "doom-flatwhite" "doom-nord" "doom-tomorrow-night" "doom-homage-white" "doom-one" "doom-opera"))
+(setq tp-doom-themes '("doom-nano-light" "doom-nano-dark" "doom-nano-modeline" "doom-ayu-light" "doom-plain" "doom-rouge" "doom-badger" "doom-challenger-deep" "doom-snazzy"  "doom-solarized-light" "doom-ephemeral" "doom-nord-light" "doom-spacegrey" "doom-flatwhite" "doom-nord" "doom-tomorrow-night" "doom-homage-white" "doom-one" "doom-opera"))
+
+(defun tp/load-new-theme ()
+  (interactive)
+  (let* ((themes tp-doom-themes)
+         (first (car tp-doom-themes)))
+    (counsel-load-theme-action (car themes))
+    (setq doom-theme (car themes))
+    (pop tp-doom-themes)
+    (add-to-list 'tp-doom-themes first t)))
+
+;; org-appear, https://github.com/awth13/org-appear
+(add-hook 'org-mode-hook 'org-appear-mode)
+
+;; some examples:
+;; https://github.com/rougier/svg-tag-mode/blob/main/examples/example-3.el
+;; reddit post that introduced it: https://www.reddit.com/r/emacs/comments/nk3i8d/svg_library_for_the_creation_of_tags_progress/
+; (use-package! svg-tag-mode)
+; from: https://github.com/rougier/svg-tag-mode/issues/38 
+(use-package! svg-tag-mode
+  :config
+  (plist-put svg-lib-style-default :font-family "Roboto Mono")
+  (plist-put svg-lib-style-default :font-size 13))
+
+(after! org
+  (add-hook 'org-mode-hook 'svg-tag-mode))
+
+
+(after! org
+  (setq org-tags-column -120)
+  (setq svg-tag-tags
+      `(
+        ; Org tags
+        (":\\([a-z0-9]+\\):" . ((lambda (tag) (svg-tag-make tag))))
+        ("NEXT" . ((lambda (tag) (svg-tag-make "NEXT" :face 'org-todo :inverse t ))))
+        ("TODO" . ((lambda (tag) (svg-tag-make "TODO" :face 'org-todo :inverse t ))))
+        ("WAITING" . ((lambda (tag) (svg-tag-make "WAITING" :face 'org-todo ))))
+        ("SOMEDAY" . ((lambda (tag) (svg-tag-make "SOMEDAY" :face 'org-todo ))))
+		("SCHEDULED" . ((lambda (tag) (svg-tag-make "SCHEDULED" :face 'org-todo ))))
+		("LATER" . ((lambda (tag) (svg-tag-make "LATER" :face 'org-todo ))))
+        ("PROJ" . ((lambda (tag) (svg-tag-make "PROJ" :face 'org-todo ))))
+        ("DONE" . ((lambda (tag) (svg-tag-make "DONE" :face 'org-todo ))))
+        ("CANCELLED" . ((lambda (tag) (svg-tag-make "CANCELLED" :face 'org-todo ))))
+  ))
+  (svg-tag-mode t)
+)
+
+
+;; https://github.com/TonCherAmi/org-padding
+;;(add-hook 'org-mode-hook #'org-padding-mode)
+;;(setq org-padding-block-begin-line-padding '(2.0 . nil))
+;;(setq org-padding-block-end-line-padding '(nil . 1.0))
+;;(setq org-padding-heading-padding-alist
+;;  '((4.0 . 1.5) (3.0 . 0.5) (3.0 . 0.5) (3.0 . 0.5) (2.5 . 0.5) (2.0 . 0.5) (1.5 . 0.5) (0.5 . 0.5)))
+
+;; from https://ianjones.us/own-your-second-brain
+(after! org-roam
+        (map! :leader
+            :prefix "n"
+            :desc "org-roam-buffer-toggle" "l" #'org-roam
+            :desc "org-roam-node-find" "f" #'org-roam-node-find
+            :desc "org-roam-graph" "g" #'org-roam-graph
+            :desc "org-roam-node-insert" "i" #'org-roam-insert
+            :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
+            :desc "org-roam-capture" "c" #'org-roam-capture))
+
+(defun my/copy-id-to-clipboard() "Copy the ID property value to killring, if no ID is there then create a new unique ID.
+This function works only in org-mode buffers.
+The purpose of this function is to easily construct id:-links to org-mode items.
+If its assigned to a key it saves you marking the text and copying to the killring."
+       (interactive)
+       (when (eq major-mode 'org-mode) ; do this only in org-mode buffers
+         (setq mytmpid (funcall 'org-id-get-create))
+         (kill-new mytmpid)
+         (message "Copied %s to killring (clipboard)" mytmpid)
+        ))
+
+(global-set-key (kbd "<f5>") 'my/copy-id-to-clipboard)
+
+;; single click treemacs expand
+;; https://www.reddit.com/r/DoomEmacs/comments/s17r9l/fresh_install_javascript_developer_tips_and_tricks/
+;; (after! treemacs
+;;    (define-key treemacs-mode-map \[mouse-1\] 'treemacs-single-click-expand-action))
+
+;; enable hook
+;; taken from https://discourse.hookproductivity.com/t/integrating-emacs-and-hook-with-org-mode/932/17
+(after! org 
+    (defun my/hook (hook)
+        "Create an org-link target string using `hook://` url scheme."
+        (shell-command (concat "open hook:\"" hook "\"")))
+    (org-add-link-type "hook" 'my/hook)
+)
+
+;; picked from https://www.rousette.org.uk/archives/doom-emacs-tweaks-org-journal-and-org-super-agenda/
+(after! org-agenda
+  :init
+  (setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator nil
+      org-agenda-compact-blocks t
+      org-agenda-start-day nil ;; i.e. today
+      org-agenda-span 1
+      org-agenda-start-on-weekday nil)
+  (setq org-agenda-custom-commands
+        '(("c" "Super view"
+           ((agenda "" ((org-agenda-overriding-header "")
+                        (org-agenda-span 'day)
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                                  :time-grid t
+                                  :date today
+                                  :scheduled today
+                                  :order 1)
+                            (:name "Due today"
+                                 :deadline today)
+                            (:name "Important"
+                                 :priority "A")
+                            (:name "Overdue"
+                                 :deadline past)
+                            (:name "Due soon"
+                                 :deadline future)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:log t)
+                            (:name "To refile"
+                                   :file-path "refile\\.org")
+                            (:name "Next to do"
+                                   :todo "NEXT"
+                                   :order 1)
+                            (:name "Important"
+                                   :priority "A"
+                                   :order 6)
+                            (:name "Today's tasks"
+                                   :file-path "journal/")
+                            (:name "Due Today"
+                                   :deadline today
+                                   :order 2)
+                            (:name "Scheduled Soon"
+                                   :scheduled future
+                                   :order 8)
+                            (:name "Overdue"
+                                   :deadline past
+                                   :order 7)
+                            (:name "Meetings"
+                                   :and (:todo "MEET" :scheduled future)
+                                   :order 10)
+                            (:discard (:not (:todo "TODO")))))))))))
+  :config
+  (org-super-agenda-mode))

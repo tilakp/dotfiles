@@ -1,0 +1,405 @@
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; =============================================================================
+;; PERSONAL INFORMATION
+;; =============================================================================
+
+(setq user-full-name "Your Name"
+      user-mail-address "you@example.com")
+
+;; =============================================================================
+;; FONT CONFIGURATION
+;; =============================================================================
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
+;;
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;; - `doom-symbol-font' -- for symbols
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
+;;
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept.
+
+;; Set fonts: Roboto Mono for code, Amazon Ember for variable pitch
+(setq doom-font (font-spec :family "Roboto Mono" :size 14)
+      doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14)
+      doom-big-font (font-spec :family "Roboto Mono" :size 18))
+
+;; If you want to adjust font size on the fly:
+;; Use `C-x C-+` or `SPC z +` to increase
+;; Use `C-x C--` or `SPC z -` to decrease
+;; Use `C-x C-0` or `SPC z 0` to reset
+
+;; =============================================================================
+;; GENERAL EDITOR SETTINGS
+;; =============================================================================
+
+;; Display settings
+(display-time-mode 1)
+(setq display-time-day-and-date t)
+
+;; File handling
+(global-auto-revert-mode 1)
+(setq auto-save-default nil)
+
+;; Performance optimizations
+(setq undo-limit 80000000
+      inhibit-compacting-font-caches t)
+
+;; Editing behavior
+(setq evil-want-fine-undo t)
+(whitespace-mode -1)
+
+;; =============================================================================
+;; ORG MODE - CORE SETTINGS
+;; =============================================================================
+
+;; Directories
+(setq org-directory "~/org/"
+      org-roam-directory "~/org/roam/")
+
+;; Task dependencies - prevent marking parent as DONE if children aren't DONE
+(setq-default org-enforce-todo-dependencies t)
+
+;; Automatic blank lines before new entries
+(setq org-blank-before-new-entry '((heading) (plain-list-item)))
+
+;; Logging - track timestamps for task state changes
+(setq org-log-done 'time          ; Log when tasks are marked DONE
+      org-log-redeadline 'time    ; Log deadline changes
+      org-log-reschedule 'time)   ; Log schedule changes
+
+;; Clocking and archiving
+(setq org-clock-into-drawer "TIME"
+      org-archive-location "%s_archive::")
+
+;; Tag alignment
+(after! org
+  (setq org-tags-column -120))
+
+;; =============================================================================
+;; ORG MODE - KEYBINDINGS
+;; =============================================================================
+
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "<f6>") 'org-capture)
+
+;; =============================================================================
+;; ORG MODE - AGENDA CONFIGURATION
+;; =============================================================================
+
+;; Agenda file management functions
+(defun org-focus-home ()
+  "Set agenda focus to home-related org files."
+  (interactive)
+  (setq org-agenda-files '("~/org/home/home.org"
+                           "~/org/home/home_repair.org")))
+
+(defun org-focus-work ()
+  "Set agenda focus to work-related org files."
+  (interactive)
+  (setq org-agenda-files '("~/org/work/work.org")))
+
+;; Agenda display settings
+(after! org-agenda
+  :init
+  (setq org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-include-deadlines t
+        org-agenda-block-separator nil
+        org-agenda-compact-blocks t
+        org-agenda-start-day nil      ; Start with today
+        org-agenda-span 1
+        org-agenda-start-on-weekday nil)
+
+  ;; Custom agenda views
+  (setq org-agenda-custom-commands
+        '(("c" "Super view"
+           ((agenda "" ((org-agenda-overriding-header "")
+                        (org-agenda-span 'day)
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                                  :time-grid t
+                                  :date today
+                                  :scheduled today
+                                  :order 1)
+                           (:name "Due today"
+                                  :deadline today)
+                           (:name "Important"
+                                  :priority "A")
+                           (:name "Overdue"
+                                  :deadline past)
+                           (:name "Due soon"
+                                  :deadline future)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:log t)
+                            (:name "To refile"
+                                   :file-path "refile\\.org")
+                            (:name "Next to do"
+                                   :todo "NEXT"
+                                   :order 1)
+                            (:name "Important"
+                                   :priority "A"
+                                   :order 6)
+                            (:name "Today's tasks"
+                                   :file-path "journal/")
+                            (:name "Due Today"
+                                   :deadline today
+                                   :order 2)
+                            (:name "Scheduled Soon"
+                                   :scheduled future
+                                   :order 8)
+                            (:name "Overdue"
+                                   :deadline past
+                                   :order 7)
+                            (:name "Meetings"
+                                   :and (:todo "MEET" :scheduled future)
+                                   :order 10)
+                            (:discard (:not (:todo "TODO")))))))))
+          ("n" "Nano Agenda"
+           (lambda (&optional arg)
+             (interactive)
+             (nano-agenda)))))
+  :config
+  (org-super-agenda-mode))
+
+;; =============================================================================
+;; ORG MODE - CAPTURE TEMPLATES
+;; =============================================================================
+;; Using doct for declarative org-capture templates
+;; Icons from all-the-icons package for visual distinction
+
+(use-package! all-the-icons)
+
+(use-package! doct
+  :commands (doct))
+
+(after! (org-capture all-the-icons)
+  (setq org-capture-templates
+        (doct `(
+                ;; Home-related captures
+                (,(format "%s\thome capture"
+                          (all-the-icons-octicon "home" :face 'all-the-icons-green :v-adjust 0.01))
+                 :keys "h"
+                 :file "~/org/home/home.org"
+                 :prepend t
+                 :children
+                 ((,(format "%s\thome todo"
+                            (all-the-icons-octicon "checklist" :face 'all-the-icons-green :v-adjust 0.01))
+                   :keys "t"
+                   :headline "Inbox"
+                   :todo-state "TODO"
+                   :template-file "~/org/templates/tpl-todo.txt")
+                  (,(format "%s\tcapture email"
+                            (all-the-icons-faicon "envelope" :face 'all-the-icons-blue :v-adjust 0.01))
+                   :keys "e"
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template-file "~/org/templates/tpl-email.txt")
+                  (,(format "%s\tjournal entry"
+                            (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01))
+                   :keys "j"
+                   :file "~/org/home/home-journal.org"
+                   :datetree t
+                   :template "* %U - %^{Activity}")))
+
+                ;; Work-related captures
+                (,(format "%s\twork capture"
+                          (all-the-icons-octicon "briefcase" :face 'all-the-icons-red :v-adjust 0.01))
+                 :keys "w"
+                 :file "~/org/work/work.org"
+                 :prepend t
+                 :children
+                 ((,(format "%s\twork todo"
+                            (all-the-icons-octicon "checklist" :face 'all-the-icons-green :v-adjust 0.01))
+                   :keys "t"
+                   :headline "Inbox"
+                   :todo-state "TODO"
+                   :template-file "~/org/templates/tpl-todo.txt")
+                  (,(format "%s\tjournal entry"
+                            (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01))
+                   :keys "j"
+                   :file "~/org/work/work-journal.org"
+                   :datetree t
+                   :template "* %U - %?")
+                  (,(format "%s\tcapture email"
+                            (all-the-icons-faicon "envelope" :face 'all-the-icons-yellow :v-adjust 0.01))
+                   :keys "e"
+                   :file "~/org/work/work.org"
+                   :prepend t
+                   :template-file "~/org/templates/tpl-email.txt")))
+
+                ;; General captures
+                (,(format "%s\tbook to read"
+                          (all-the-icons-octicon "book" :face 'all-the-icons-green :v-adjust 0.02))
+                 :keys "b"
+                 :file "~/org/books.org"
+                 :headline "Books to read"
+                 :prepend t
+                 :template-file "~/org/templates/tpl-book.txt")
+
+                (,(format "%s\tideas"
+                          (all-the-icons-faicon "lightbulb-o" :face 'all-the-icons-yellow :v-adjust 0.02))
+                 :keys "i"
+                 :file "~/org/ideas.org"
+                 :headline "Ideas"
+                 :prepend t
+                 :template-file "~/org/templates/tpl-idea.txt")
+
+                (,(format "%s\tthoughts/observations"
+                          (all-the-icons-faicon "bolt" :face 'all-the-icons-yellow :v-adjust 0.01))
+                 :keys "o"
+                 :file "~/org/thoughts-and-observations-journal.org"
+                 :datetree t
+                 :template "* %U - %?")))))
+
+;; =============================================================================
+;; ORG ROAM CONFIGURATION
+;; =============================================================================
+;; Knowledge base with bi-directional linking
+
+(after! org-roam
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam-buffer-toggle" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-graph" "g" #'org-roam-graph
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
+        :desc "org-roam-capture" "c" #'org-roam-capture))
+
+;; =============================================================================
+;; MACLINK CONFIGURATION
+;; =============================================================================
+;; maclink:// links already open with no config (org falls through to
+;; browse-url, which shells out to /usr/bin/open on macOS). This loads the
+;; optional sugar: maclink-insert-from-clipboard and a real `maclink' org
+;; link type. See ~/workspace/maclink/README.md, "Using it from Emacs".
+
+(load! "~/workspace/maclink/contrib/maclink.el")
+
+(map! :leader
+      :prefix "n"
+      :desc "maclink-insert-from-clipboard" "m" #'maclink-insert-from-clipboard)
+
+;; =============================================================================
+;; ORG MODE - VISUAL ENHANCEMENTS
+;; =============================================================================
+
+;; Show hidden emphasis markers on cursor proximity
+(add-hook 'org-mode-hook 'org-appear-mode)
+
+;; org-modern provides modern styling for org-mode with better compatibility
+(use-package! org-modern
+  :hook (org-mode . org-modern-mode)
+  :config
+  ;; Customize org-modern appearance
+  (setq
+   ;; Use rounded boxes for tags instead of sharp rectangles
+   org-modern-tag-style 'rounded
+   
+   ;; Style for TODO keywords - will show as colored labels
+   org-modern-keyword nil  ; Use default keyword styling
+   
+   ;; Configure TODO keyword styles
+   org-modern-todo t
+   org-modern-todo-faces
+   '(("TODO" :background "#ff6c6b" :foreground "#282c34")
+     ("NEXT" :background "#2b81d6" :foreground "#000000")
+     ("WAITING" :background "#e6d925" :foreground "#282c34")
+     ("SOMEDAY" :background "#a9a1e1" :foreground "#282c34")
+     ("SCHEDULED" :background "#98be65" :foreground "#282c34")
+     ("LATER" :background "#c678dd" :foreground "#282c34")
+     ("PROJ" :background "#46D9FF" :foreground "#282c34")
+     ("DONE" :background "#98be65" :foreground "#282c34")
+     ("CANCELLED" :background "#5B6268" :foreground "#282c34"))
+   
+   ;; Modern styling for other elements
+   org-modern-star '("◉" "○" "◈" "◇" "✳")  ; Bullet styles for headlines
+   org-modern-table-vertical 1           ; Vertical table lines
+   org-modern-table-horizontal 0.1       ; Horizontal table lines
+   org-modern-list '((43 . "➤")          ; Custom list bullet for '+'
+                     (45 . "–")          ; Custom list bullet for '-'
+                     (42 . "•"))         ; Custom list bullet for '*'
+   org-modern-block-fringe 8             ; Block fringe width
+   org-modern-block-name t               ; Style block names
+   org-modern-priority t                 ; Style priority markers
+   org-modern-checkbox nil               ; Use default checkbox styling
+   org-modern-horizontal-rule t))        ; Style horizontal rules
+
+;; Disable hl-line-mode in org-mode to prevent TODO keyword color changes
+(add-hook 'org-mode-hook (lambda () (hl-line-mode -1)))
+
+;; Additional org-mode visual settings that work well with org-modern
+(after! org
+  (setq
+   ;; Hide emphasis markers (bold, italic, etc.)
+   org-hide-emphasis-markers t
+   
+   ;; Use pretty entities (e.g., \alpha shows as α)
+   org-pretty-entities t
+   
+   ;; Custom ellipsis for folded sections
+   org-ellipsis " ▼ "
+   
+   ;; Better tag alignment
+   org-auto-align-tags nil
+   org-tags-column 0))
+
+;; =============================================================================
+;; EXTERNAL INTEGRATIONS
+;; =============================================================================
+
+;; Hook app integration - create org-mode links to Hook.app resources
+(after! org
+  (defun my/hook (hook)
+    "Open Hook.app bookmark using hook:// URL scheme."
+    (shell-command (concat "open hook:\"" hook "\"")))
+  (org-add-link-type "hook" 'my/hook))
+
+;; =============================================================================
+;; THEME CONFIGURATION
+;; =============================================================================
+
+;; Available themes for rotation
+(setq tp-doom-themes '("doom-nano-light" "doom-nano-dark"))
+
+;; Load Nano theme
+(setq doom-theme 'doom-nano-light)
+(after! doom-themes
+  (load-theme 'doom-nano-light t))
+
+(load! "nano-theme")
+
+;; Nano modeline configuration
+(use-package! doom-nano-modeline
+  :config
+  (doom-nano-modeline-mode 1)
+  (global-hide-mode-line-mode 1))
+
+;; Theme cycling function
+(defun tp/load-new-theme ()
+  "Cycle through available themes in tp-doom-themes list."
+  (interactive)
+  (let* ((themes tp-doom-themes)
+         (first (car tp-doom-themes)))
+    (counsel-load-theme-action (car themes))
+    (setq doom-theme (car themes))
+    (pop tp-doom-themes)
+    (add-to-list 'tp-doom-themes first t)))
+
+;; =============================================================================
+;; COMMENTED OUT / OPTIONAL CONFIGURATIONS
+;; =============================================================================
+
+;; Spell checking configuration (currently disabled)
+;; Uncomment and set correct path if using ispell
+;; (setq ispell-program-name "/usr/local/bin/ispell")
+
+;; Alternative bullet styling (currently disabled)
+;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
