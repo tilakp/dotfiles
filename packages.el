@@ -49,25 +49,13 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
-(package! org-fancy-priorities)
 (package! org-super-agenda)
-(package! deadgrep)
-(package! ascii-art-to-unicode)
-(package! wakatime-mode)
-(package! move-text)
-(package! org-brain)
 (package! all-the-icons)
 (package! doct)
 (package! org-appear)
-(package! org-noter)
-(package! svg-lib)
 (package! org-modern)
-(package! svg-tag-mode)
-(package! org-roam)
-(package! ox-gfm)
-(package! doom-modeline) 
-(package! org-bullets)
-;; Required for nano-agenda
+
+;; Required for nano-agenda.el
 (package! ts)
 
 (package! doom-nano-modeline

@@ -24,9 +24,10 @@
 ;; accept.
 
 ;; Set fonts: Roboto Mono for code, Amazon Ember for variable pitch
-(setq doom-font (font-spec :family "Roboto Mono" :size 14)
-      doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14)
-      doom-big-font (font-spec :family "Roboto Mono" :size 18))
+;; NOTE `:size' with a float is a point size; an integer is a pixel size.
+(setq doom-font (font-spec :family "Roboto Mono" :size 14.0 :weight 'light)
+      doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14.0)
+      doom-big-font (font-spec :family "Roboto Mono" :size 18.0 :weight 'light))
 
 ;; If you want to adjust font size on the fly:
 ;; Use `C-x C-+` or `SPC z +` to increase
@@ -51,7 +52,6 @@
 
 ;; Editing behavior
 (setq evil-want-fine-undo t)
-(whitespace-mode -1)
 
 ;; =============================================================================
 ;; ORG MODE - CORE SETTINGS
@@ -76,20 +76,23 @@
 (setq org-clock-into-drawer "TIME"
       org-archive-location "%s_archive::")
 
-;; Tag alignment
-(after! org
-  (setq org-tags-column -120))
-
 ;; =============================================================================
 ;; ORG MODE - KEYBINDINGS
 ;; =============================================================================
 
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "<f6>") 'org-capture)
+(global-set-key (kbd "C-c h") 'org-focus-home)
+(global-set-key (kbd "C-c w") 'org-focus-work)
+(global-set-key (kbd "C-c t") 'tp/load-new-theme)
 
 ;; =============================================================================
 ;; ORG MODE - AGENDA CONFIGURATION
 ;; =============================================================================
+
+;; nano-agenda.el lives in this directory, which is not on `load-path'.
+(autoload 'nano-agenda (expand-file-name "nano-agenda" doom-user-dir)
+  "Display the NANO agenda." t)
 
 ;; Agenda file management functions
 (defun org-focus-home ()
@@ -105,7 +108,6 @@
 
 ;; Agenda display settings
 (after! org-agenda
-  :init
   (setq org-agenda-skip-scheduled-if-done t
         org-agenda-skip-deadline-if-done t
         org-agenda-include-deadlines t
@@ -164,7 +166,7 @@
            (lambda (&optional arg)
              (interactive)
              (nano-agenda)))))
-  :config
+
   (org-super-agenda-mode))
 
 ;; =============================================================================
@@ -281,11 +283,10 @@
 ;; optional sugar: maclink-insert-from-clipboard and a real `maclink' org
 ;; link type. See ~/workspace/maclink/README.md, "Using it from Emacs".
 
-(load! "~/workspace/maclink/contrib/maclink.el")
-
-(map! :leader
-      :prefix "n"
-      :desc "maclink-insert-from-clipboard" "m" #'maclink-insert-from-clipboard)
+(when (load! "~/workspace/maclink/contrib/maclink.el" nil t)
+  (map! :leader
+        :prefix "n"
+        :desc "maclink-insert-from-clipboard" "m" #'maclink-insert-from-clipboard))
 
 ;; =============================================================================
 ;; ORG MODE - VISUAL ENHANCEMENTS
@@ -371,8 +372,6 @@
 
 ;; Load Nano theme
 (setq doom-theme 'doom-nano-light)
-(after! doom-themes
-  (load-theme 'doom-nano-light t))
 
 (load! "nano-theme")
 
@@ -384,14 +383,16 @@
 
 ;; Theme cycling function
 (defun tp/load-new-theme ()
-  "Cycle through available themes in tp-doom-themes list."
+  "Cycle to the next theme in `tp-doom-themes'."
   (interactive)
-  (let* ((themes tp-doom-themes)
-         (first (car tp-doom-themes)))
-    (counsel-load-theme-action (car themes))
-    (setq doom-theme (car themes))
-    (pop tp-doom-themes)
-    (add-to-list 'tp-doom-themes first t)))
+  ;; Rotate first, so the first press moves off the theme already in use.
+  (setq tp-doom-themes (append (cdr tp-doom-themes)
+                               (list (car tp-doom-themes))))
+  (let ((next (intern (car tp-doom-themes))))
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme next t)
+    (setq doom-theme next)
+    (message "Theme: %s" next)))
 
 ;; =============================================================================
 ;; COMMENTED OUT / OPTIONAL CONFIGURATIONS
@@ -400,6 +401,3 @@
 ;; Spell checking configuration (currently disabled)
 ;; Uncomment and set correct path if using ispell
 ;; (setq ispell-program-name "/usr/local/bin/ispell")
-
-;; Alternative bullet styling (currently disabled)
-;; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))

@@ -23,17 +23,19 @@
 ;; ---------------------------------------------------------------------
 
 ;; --- Typography settings --------------------------------------------
+;; NOTE The default face family/size/weight lives in config.el (`doom-font'),
+;; which Doom applies after this file loads. Setting it here as well was dead
+;; code that Doom overwrote every startup.
 (setq-default line-spacing 0.15)
-(set-face-attribute 'default nil :height 140 :weight 'light :family "Roboto Mono")
 (set-face-attribute 'bold nil :weight 'regular)
 (set-face-attribute 'bold-italic nil :weight 'regular)
 
 ;; --- Frame / window layout & behavior ------------------------------
-(setq default-frame-alist
-      '((height . 44) (width . 81) (left-fringe . 0) (right-fringe . 0)
-        (internal-border-width . 32) (vertical-scroll-bars . nil)
-        (bottom-divider-width . 0) (right-divider-width . 0)
-        (undecorated-round . t)))
+(dolist (param '((height . 44) (width . 81) (left-fringe . 0) (right-fringe . 0)
+                 (internal-border-width . 32) (vertical-scroll-bars . nil)
+                 (bottom-divider-width . 0) (right-divider-width . 0)
+                 (undecorated-round . t)))
+  (setf (alist-get (car param) default-frame-alist) (cdr param)))
 
 ;; --- Minimal NANO theme faces --------------------------------------
 (defface nano-default
@@ -111,28 +113,56 @@
       (set-face-attribute face nil :inherit sources))))
 
 ;; --- Theme installation function -----------------------------------
-(defun nano-install-theme ()
-  "Install light theme"
+(defvar nano-theme-light
+  '((bg . "#ffffff") (fg . "#000000") (highlight . "#f4f4f4")
+    (subtle . "#505050") (faded . "#a0a0a0") (salient . "#4078f2")
+    (popout . "#9558b2") (strong . "#000000") (critical . "#ff0000"))
+  "NANO palette used when a light theme is active.")
 
-  (let ((bg "#ffffff")
-        (fg "#000000"))
-  
+(defvar nano-theme-dark
+  '((bg . "#2e3440") (fg . "#eceff4") (highlight . "#3b4252")
+    (subtle . "#434c5e") (faded . "#677691") (salient . "#81a1c1")
+    (popout . "#d08770") (strong . "#eceff4") (critical . "#ebcb8b"))
+  "NANO palette used when a dark theme is active.")
+
+(defun nano-theme-dark-p ()
+  "Return non-nil when the active theme is a dark one.
+Prefer the enabled theme's name, because `background-mode' is unreliable
+before a graphical frame exists (for example under `emacs --daemon')."
+  (let ((name (symbol-name (or (car custom-enabled-themes) 'unknown))))
+    (cond ((string-match-p "dark" name) t)
+          ((string-match-p "light" name) nil)
+          (t (eq (frame-parameter nil 'background-mode) 'dark)))))
+
+(defun nano-theme-palette ()
+  "Return the NANO palette that matches the active theme."
+  (if (nano-theme-dark-p) nano-theme-dark nano-theme-light))
+
+(defun nano-install-theme ()
+  "Apply the NANO faces on top of the active theme."
+  (interactive)
+
+  (let* ((palette (nano-theme-palette))
+         (bg (alist-get 'bg palette))
+         (fg (alist-get 'fg palette))
+         (highlight (alist-get 'highlight palette)))
+
     ;; Main faces
     (nano-set-face 'nano-default fg bg)
-    (nano-set-face 'nano-highlight fg "#f4f4f4")
-    (nano-set-face 'nano-subtle "#505050" nil)
-    (nano-set-face 'nano-faded "#a0a0a0" nil)
-    (nano-set-face 'nano-salient "#4078f2" nil)
-    (nano-set-face 'nano-popout "#9558b2" nil)
-    (nano-set-face 'nano-strong "#000000" nil 'bold)
-    (nano-set-face 'nano-critical "#ff0000" nil)
+    (nano-set-face 'nano-highlight fg highlight)
+    (nano-set-face 'nano-subtle (alist-get 'subtle palette) nil)
+    (nano-set-face 'nano-faded (alist-get 'faded palette) nil)
+    (nano-set-face 'nano-salient (alist-get 'salient palette) nil)
+    (nano-set-face 'nano-popout (alist-get 'popout palette) nil)
+    (nano-set-face 'nano-strong (alist-get 'strong palette) nil 'bold)
+    (nano-set-face 'nano-critical (alist-get 'critical palette) nil)
     
     ;; Mode and header lines
     (set-face-attribute 'header-line nil
                       :background 'unspecified
                       :underline nil
-                      :box '(:line-width 1
-                             :color "#f4f4f4"
+                      :box `(:line-width 1
+                             :color ,highlight
                              :style nil)
                       :inherit 'nano-subtle)
     
@@ -203,6 +233,9 @@
     (nano-link-face '(nano-strong)  '(org-level-2 org-level-3))))
 
 ;; --- Theme initialization -------------------------------------------
+;; Run after every `load-theme'/`enable-theme', so the NANO faces survive a
+;; theme switch and follow the light/dark palette.
+(add-hook 'doom-load-theme-hook #'nano-install-theme)
 (nano-install-theme)
 
 (provide 'nano-theme)
