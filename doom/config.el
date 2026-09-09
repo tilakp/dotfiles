@@ -23,10 +23,11 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept.
 
-;; Set fonts: Roboto Mono for code, Amazon Ember for variable pitch
+;; Set fonts: Roboto Mono for everything. No `doom-variable-pitch-font' --
+;; this setup is monospace throughout (code, org, modeline), so the
+;; `variable-pitch' face it would control is never actually displayed.
 ;; NOTE `:size' with a float is a point size; an integer is a pixel size.
 (setq doom-font (font-spec :family "Roboto Mono" :size 14.0 :weight 'medium)
-      doom-variable-pitch-font (font-spec :family "Amazon Ember" :size 14.0)
       doom-big-font (font-spec :family "Roboto Mono" :size 18.0 :weight 'medium))
 
 ;; If you want to adjust font size on the fly:

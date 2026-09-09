@@ -62,15 +62,11 @@ After changing `init.el` or `packages.el`:
 ~/.config/emacs/bin/doom sync
 ```
 
-The theme is tuned around two fonts set in `config.el` (`doom-font`,
-`doom-variable-pitch-font`) that are not installed by `doom sync` and are not
-tracked in this repo:
-
-- **Roboto Mono** -- free, e.g. `brew install --cask font-roboto-mono`
-- **Amazon Ember** -- Amazon-internal, obtained separately
-
-Without them Emacs silently falls back to a different font, and the spacing
-`nano-theme.el` assumes (line height, label padding) will be slightly off.
+The theme is tuned around `doom-font` in `config.el` -- **Roboto Mono**
+(`brew install --cask font-roboto-mono`) -- which is not installed by
+`doom sync` and not tracked in this repo. Without it Emacs silently falls
+back to a different font, and the spacing `nano-theme.el` assumes (line
+height, label padding) will be slightly off.
 
 Two things in `doom/` look like clutter but are not:
 
