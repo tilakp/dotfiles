@@ -198,6 +198,51 @@ before a graphical frame exists (for example under `emacs --daemon')."
                           :foreground foreground
                           :background (or background 'unspecified)))))
 
+;; --- Nano-agenda faces ------------------------------------------------
+;; nano-agenda.el ships its own defface set, hardcoded to a fixed light
+;; palette (pure black/white, cool greys, a saturated blue "selected"
+;; highlight) that ignores the active theme entirely. Retint them here
+;; from the same palette `nano-install-theme' uses, so the mini calendar
+;; and agenda entry list follow light/dark instead of clashing with it.
+;; nano-agenda.el is autoloaded (see config.el) and may not be loaded
+;; yet when the theme first loads, hence the `facep' guard below and the
+;; `with-eval-after-load' at the bottom of this file.
+(defun nano-install-agenda-faces ()
+  "Apply the active NANO palette to `nano-agenda' faces."
+  (interactive)
+  (when (facep 'nano-agenda-face-default)
+    (let* ((palette (nano-theme-palette))
+           (bg (alist-get 'bg palette))
+           (highlight (alist-get 'highlight palette))
+           (faded (alist-get 'faded palette))
+           (salient (alist-get 'salient palette))
+           (popout (alist-get 'popout palette))
+           (strong (alist-get 'strong palette)))
+      ;; Today, and the cursor is on it: the loudest marker, same accent
+      ;; colour as the "next" todo label.
+      (set-face-attribute 'nano-agenda-face-selected-today nil
+                          :foreground bg :background popout)
+      ;; Cursor on a non-today date.
+      (set-face-attribute 'nano-agenda-face-selected nil
+                          :foreground strong :background highlight)
+      ;; Today, cursor elsewhere: quieter than selected-today, still
+      ;; distinct from a plain day.
+      (set-face-attribute 'nano-agenda-face-today nil
+                          :foreground popout :background highlight)
+      (set-face-attribute 'nano-agenda-face-weekend nil
+                          :foreground faded :background 'unspecified)
+      (set-face-attribute 'nano-agenda-face-holidays nil
+                          :foreground faded :background 'unspecified)
+      (set-face-attribute 'nano-agenda-face-outday nil
+                          :foreground faded :background 'unspecified)
+      (set-face-attribute 'nano-agenda-face-button nil
+                          :foreground faded :background 'unspecified)
+      ;; Agenda entry text (the task list under the mini calendar); was
+      ;; hardcoded black+bold, invisible on a dark background.
+      (set-face-attribute 'nano-face-salient nil
+                          :foreground salient :background 'unspecified
+                          :weight 'bold))))
+
 ;; --- SVG todo labels (org headline buffers) -------------------------
 ;; org-modern styles TODO keywords with a `:box' face attribute, which
 ;; cannot have rounded corners -- Emacs's box has no radius property.
@@ -367,14 +412,16 @@ before a graphical frame exists (for example under `emacs --daemon')."
 (add-hook 'doom-load-theme-hook #'nano-install-theme)
 (add-hook 'doom-load-theme-hook #'nano-install-labels)
 (add-hook 'doom-load-theme-hook #'nano-install-org-metadata)
+(add-hook 'doom-load-theme-hook #'nano-install-agenda-faces)
 ;; Appended (not prepended) so it runs after `nano-install-labels' above has
 ;; already updated the nano-label-* colours the SVG tags read from.
 (add-hook 'doom-load-theme-hook #'nano-refresh-svg-todo-tags t)
-;; org and org-modern both load lazily, after the theme. Until they do, their
-;; faces do not exist and `nano-install-org-metadata' silently skips them, so
-;; run it again once each is actually available.
+;; org, org-modern and nano-agenda all load lazily, after the theme. Until
+;; they do, their faces do not exist and the installer above silently skips
+;; them, so run it again once each is actually available.
 (with-eval-after-load 'org (nano-install-org-metadata))
 (with-eval-after-load 'org-modern (nano-install-org-metadata))
+(with-eval-after-load 'nano-agenda (nano-install-agenda-faces))
 (nano-install-theme)
 (nano-install-labels)
 (nano-install-org-metadata)
