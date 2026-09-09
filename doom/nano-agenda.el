@@ -265,7 +265,7 @@
                                          'help-echo (format "%s%s" (ts-format "%A %-e %B %Y" date)
                                                            (if is-holidays (format " (%s)" (nth 0 is-holidays)) ""))
                                          'keymap map)))))
-      (setq result (concat result "\n\n")))  ; Add extra spacing between rows
+      (setq result (concat result "\n")))
     result))
 
 (defun nano-agenda-get-entries (date)
