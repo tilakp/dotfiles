@@ -97,7 +97,6 @@
 
 ;; --- Global variable ------------------------------------------------
 (setq nano-agenda-selected (ts-now))
-(setq nano-agenda-file "~/Documents/org/agenda.org")
 
 ;; --- Useful functions -----------------------------------------------
 (defun center-string (string size)
@@ -271,14 +270,16 @@
     result))
 
 (defun nano-agenda-get-entries (date)
-  "Get org agenda entries for DATE."
-  (let ((org-agenda-files (list nano-agenda-file))
-        entries)
-    (setq entries (org-agenda-get-day-entries 
-                   org-agenda-files
-                   (calendar-gregorian-from-absolute
-                    (time-to-days (ts-unix date)))))
-    entries))
+  "Get org agenda entries for DATE, pulled from `org-agenda-files'.
+Calls the `org-agenda-files' function rather than reading the variable
+directly, since the variable's value can be a bare directory (Doom's
+default before `org-focus-home'/`org-focus-work' narrows it) and only
+the function expands that into actual .org files."
+  (let ((day (calendar-gregorian-from-absolute
+              (time-to-days (ts-unix date)))))
+    (apply #'append
+           (mapcar (lambda (file) (org-agenda-get-day-entries file day))
+                   (org-agenda-files)))))
 
 (defun nano-agenda ()
   "Show a nano agenda view with calendar and org entries."
