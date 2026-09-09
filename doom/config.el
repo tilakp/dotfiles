@@ -101,16 +101,30 @@
   "Display the NANO agenda." t)
 
 ;; Agenda file management functions
+(defvar org-focus-home-files
+  '("~/org/home/home.org"
+    "~/org/home/home-repair.org")
+  "Org files considered \"home\" for `org-focus-home'.")
+
+(defvar org-focus-work-files
+  '("~/org/work/work.org")
+  "Org files considered \"work\" for `org-focus-work'.")
+
 (defun org-focus-home ()
-  "Set agenda focus to home-related org files."
+  "Narrow the agenda to home-related org files."
   (interactive)
-  (setq org-agenda-files '("~/org/home/home.org"
-                           "~/org/home/home-repair.org")))
+  (setq org-agenda-files org-focus-home-files))
 
 (defun org-focus-work ()
-  "Set agenda focus to work-related org files."
+  "Narrow the agenda to work-related org files."
   (interactive)
-  (setq org-agenda-files '("~/org/work/work.org")))
+  (setq org-agenda-files org-focus-work-files))
+
+;; Default to both combined, so a cold agenda (before C-c h / C-c w is
+;; ever pressed) shows real tasks instead of silently falling back to
+;; Doom's default -- the bare org-directory, which directory-expands
+;; non-recursively and so misses every file under home/ and work/.
+(setq org-agenda-files (append org-focus-home-files org-focus-work-files))
 
 ;; Agenda display settings
 (after! org-agenda
