@@ -55,17 +55,19 @@
 (def-doom-theme doom-nano-dark
   "A dark theme for Doom Emacs based on N Λ N O."
 
-  (;; Colors defined by N Λ N O theme. Some colors for the 256 and 16 modes were
-   ;; obtained from the Doom Nord theme.
-   (nano-foreground '("#ECEFF4" "#ECECEC" "white"))
-   (nano-background '("#2E3440" "#2E2E2E" "black"))
-   (nano-highlight  '("#3B4252" "#262626" "brightblack"))
-   (nano-subtle     '("#434C5E" "#3F3F3F" "brightblack"))
-   (nano-faded      '("#677691" "#5699AF" "cyan"))
-   (nano-salient    '("#81A1C1" "#51AFEF" "brightblue"))
-   (nano-strong     '("#FFFFFF" "#FFFFFF" "brightwhite"))
-   (nano-popout     '("#D08770" "#DD8844" "brightred"))
-   (nano-critical   '("#EBCB8B" "#ECBE7B" "yellow"))
+  (;; Colors defined by N Λ N O theme. Retuned warm (Claude.ai dark-mode
+   ;; inspired) instead of the original cool/Nordic palette, so every
+   ;; foreground role clears WCAG AA (4.5:1) against the background --
+   ;; the original nano-faded only hit 2.72:1.
+   (nano-foreground '("#EDEAE1" "#DFDBCF" "white"))
+   (nano-background '("#262624" "#262626" "black"))
+   (nano-highlight  '("#33322F" "#303030" "brightblack"))
+   (nano-subtle     '("#3A3935" "#3A3A3A" "brightblack"))
+   (nano-faded      '("#9C9992" "#9E9E9E" "brightblack"))
+   (nano-salient    '("#C9A66B" "#D7AF5F" "yellow"))
+   (nano-strong     '("#FAF9F5" "#FFFFFF" "brightwhite"))
+   (nano-popout     '("#D97757" "#D75F5F" "brightred"))
+   (nano-critical   '("#E36C5F" "#DF5F5F" "red"))
 
    ;; Required colors for a Doom theme.
    (bg             nano-background)
@@ -74,15 +76,15 @@
    (bg-alt         nano-highlight)
    (fg-alt         nano-foreground)
 
-   (base0          '("#191C25" "black"   "black"        ))
-   (base1          '("#242832" "#1E1E1E" "brightblack"  ))
-   (base2          '("#2C333F" "#2E2E2E" "brightblack"  ))
-   (base3          '("#373E4C" "#262626" "brightblack"  ))
-   (base4          '("#434C5E" "#3F3F3F" "brightblack"  ))
-   (base5          '("#4C566A" "#525252" "brightblack"  ))
-   (base6          '("#9099AB" "#6B6B6B" "brightblack"  ))
-   (base7          '("#D8DEE9" "#979797" "brightblack"  ))
-   (base8          '("#F0F4FC" "#DFDFDF" "white"        ))
+   (base0          '("#1C1B19" "black"   "black"        ))
+   (base1          '("#221F1C" "#1E1E1E" "brightblack"  ))
+   (base2          '("#2A2825" "#2E2E2E" "brightblack"  ))
+   (base3          '("#33322F" "#262626" "brightblack"  ))
+   (base4          '("#3A3935" "#3F3F3F" "brightblack"  ))
+   (base5          '("#454339" "#525252" "brightblack"  ))
+   (base6          '("#746E62" "#6B6B6B" "brightblack"  ))
+   (base7          '("#B7B0A2" "#979797" "brightblack"  ))
+   (base8          '("#F5F2EA" "#DFDFDF" "white"        ))
 
    (bright-blue    '("#BBDEFB" "#BBDEFB" "brightblue"))
    (bright-cyan    '("#B2EBF2" "#B2EBF2" "brightcyan"))

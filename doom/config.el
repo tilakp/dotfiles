@@ -277,7 +277,7 @@
         :desc "org-roam-node-find" "f" #'org-roam-node-find
         :desc "org-roam-graph" "g" #'org-roam-graph
         :desc "org-roam-node-insert" "i" #'org-roam-node-insert
-        :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
+        :desc "org-roam-dailies-capture-today" "T" #'org-roam-dailies-capture-today
         :desc "org-roam-capture" "c" #'org-roam-capture))
 
 ;; =============================================================================
@@ -311,38 +311,12 @@
    
    ;; Style for TODO keywords - will show as colored labels
    org-modern-keyword nil  ; Use default keyword styling
-   
-   ;; Configure TODO keyword styles.
-   ;; These name faces defined in nano-theme.el rather than raw colours, so
-   ;; they follow the light/dark theme instead of being pinned to one.
-   ;; Keywords are grouped by the decision they ask for, not by hue:
-   ;;   next    - act on this now
-   ;;   waiting - blocked on someone else, needs a nudge
-   ;;   open    - in the backlog (the default for anything unlisted)
-   ;;   later   - deliberately parked
-   ;;   done    - closed, should recede
-   org-modern-todo t
-   org-modern-todo-faces
-   '(("NEXT"      . nano-label-next)
-     ("MEET"      . nano-label-meeting)
-     ("STRT"      . nano-label-next)
-     ("WIP"       . nano-label-next)
-     ("WAITING"   . nano-label-waiting)
-     ("WAIT"      . nano-label-waiting)
-     ("HOLD"      . nano-label-waiting)
-     ("DELG"      . nano-label-waiting)
-     ("FOLLOWUP"  . nano-label-waiting)
-     ("CONTACTED" . nano-label-waiting)
-     ("DISCUSS"   . nano-label-waiting)
-     ("SOMEDAY"   . nano-label-later)
-     ("LATER"     . nano-label-later)
-     ("IDEA"      . nano-label-later)
-     ("DONE"      . nano-label-done)
-     ("CANCELLED" . nano-label-done)
-     ("KILL"      . nano-label-done)
-     ("SKIP"      . nano-label-done)
-     (t           . nano-label-open))
-   
+
+   ;; TODO keyword boxes are rendered by svg-tag-mode instead (see
+   ;; nano-theme.el) so they can have real rounded corners -- Emacs's
+   ;; `:box' face attribute, which org-modern-todo uses, cannot round.
+   org-modern-todo nil
+
    ;; Modern styling for other elements
    org-modern-star '("◉" "○" "◈" "◇" "✳")  ; Bullet styles for headlines
    org-modern-table-vertical 1           ; Vertical table lines
@@ -391,7 +365,7 @@
 ;; =============================================================================
 
 ;; Available themes for rotation
-(setq tp-doom-themes '("doom-nano-light" "doom-nano-dark"))
+(setq tp-doom-themes '("doom-nano-dark" "doom-nano-light"))
 
 ;; NOTE The doom-nano-* theme files in ./themes/ are deliberate copies, not
 ;; duplicates to clean up. doom-nano-themes' README tells you to copy them into
@@ -400,7 +374,7 @@
 ;; that fails to load, so pointing at it directly does not work.
 
 ;; Load Nano theme
-(setq doom-theme 'doom-nano-light)
+(setq doom-theme 'doom-nano-dark)
 
 (load! "nano-theme")
 

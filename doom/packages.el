@@ -55,6 +55,12 @@
 (package! org-appear)
 (package! org-modern)
 
+;; Rounded SVG todo-keyword labels in org headline buffers -- Emacs's
+;; `:box' face attribute (what org-modern uses) has no corner radius.
+;; See nano-theme.el.
+(package! svg-lib)
+(package! svg-tag-mode)
+
 ;; Required for nano-agenda.el
 (package! ts)
 

@@ -118,9 +118,9 @@
   "NANO palette used when a light theme is active.")
 
 (defvar nano-theme-dark
-  '((bg . "#2e3440") (fg . "#eceff4") (highlight . "#3b4252")
-    (subtle . "#434c5e") (faded . "#677691") (salient . "#81a1c1")
-    (popout . "#d08770") (strong . "#eceff4") (critical . "#ebcb8b"))
+  '((bg . "#262624") (fg . "#edeae1") (highlight . "#33322f")
+    (subtle . "#3a3935") (faded . "#9c9992") (salient . "#c9a66b")
+    (popout . "#d97757") (strong . "#faf9f5") (critical . "#e36c5f"))
   "NANO palette used when a dark theme is active.")
 
 (defun nano-theme-dark-p ()
@@ -152,12 +152,12 @@ before a graphical frame exists (for example under `emacs --daemon')."
   "Todo label colours used when a light theme is active.")
 
 (defvar nano-labels-dark
-  '((next    "#a9c9ea" "#1b212b")
-    (meeting "#8fc7bf" "#16221f")
+  '((next    "#d97757" "#262624")
+    (meeting "#8fb79b" "#16221f")
     (waiting "#d8b878" "#1b212b")
-    (open    "#4a5568" "#e5e9f0")
-    (later   "#3b4252" "#a7b3c4")
-    (done    "#3d4452" "#adbacc"))
+    (open    "#45443f" "#e8e6dc")
+    (later   "#383733" "#aaa59c")
+    (done    "#2a2825" "#9a958c"))
   "Todo label colours used when a dark theme is active.")
 
 (defface nano-label-next    '((t)) "Label for actionable tasks.")
@@ -197,6 +197,67 @@ before a graphical frame exists (for example under `emacs --daemon')."
       (set-face-attribute face nil
                           :foreground foreground
                           :background (or background 'unspecified)))))
+
+;; --- SVG todo labels (org headline buffers) -------------------------
+;; org-modern styles TODO keywords with a `:box' face attribute, which
+;; cannot have rounded corners -- Emacs's box has no radius property.
+;; svg-lib/svg-tag-mode render real rounded-rect images instead, so
+;; this owns TODO keyword styling in org-mode buffers (org-modern-todo
+;; is nil, see config.el). Org-agenda is untouched: org-modern was
+;; never hooked into org-agenda-mode, so this doesn't reach it either.
+;;
+;; Keyword tiers, relocated here from the old org-modern-todo-faces:
+;; keywords are grouped by the decision they ask for, not by hue.
+;;   next    - act on this now
+;;   waiting - blocked on someone else, needs a nudge
+;;   open    - in the backlog (the default for anything unlisted)
+;;   later   - deliberately parked
+;;   done    - closed, should recede
+(defvar nano-todo-label-faces
+  '(("NEXT"      . nano-label-next)
+    ("MEET"      . nano-label-meeting)
+    ("STRT"      . nano-label-next)
+    ("WIP"       . nano-label-next)
+    ("TODO"      . nano-label-open)
+    ("PROJ"      . nano-label-open)
+    ("WAITING"   . nano-label-waiting)
+    ("WAIT"      . nano-label-waiting)
+    ("HOLD"      . nano-label-waiting)
+    ("DELG"      . nano-label-waiting)
+    ("FOLLOWUP"  . nano-label-waiting)
+    ("CONTACTED" . nano-label-waiting)
+    ("DISCUSS"   . nano-label-waiting)
+    ("SOMEDAY"   . nano-label-later)
+    ("LATER"     . nano-label-later)
+    ("IDEA"      . nano-label-later)
+    ("DONE"      . nano-label-done)
+    ("CANCELLED" . nano-label-done)
+    ("KILL"      . nano-label-done)
+    ("SKIP"      . nano-label-done))
+  "Todo keyword to nano-label-* face, one entry per `org-todo-keywords' state.")
+
+(when (require 'svg-tag-mode nil t)
+  ;; Built once: each tag function closes over a FACE symbol and reads
+  ;; its live foreground/background at every fontification, so this
+  ;; does not need to be rebuilt when the theme (and label colours)
+  ;; change -- only a re-fontify is needed, see nano-refresh-svg-todo-tags.
+  (setq svg-tag-tags
+        (mapcar
+         (lambda (entry)
+           (let ((keyword (car entry))
+                 (face (cdr entry)))
+             (cons (format "^\\*+\\s-+\\(%s\\)\\(?:\\s-\\|$\\)" (regexp-quote keyword))
+                   (list (lambda (tag) (svg-tag-make tag :face face :radius 4))
+                         nil nil))))
+         nano-todo-label-faces))
+  (add-hook 'org-mode-hook #'svg-tag-mode))
+
+(defun nano-refresh-svg-todo-tags ()
+  "Re-fontify open org buffers so SVG todo tags pick up new theme colours."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'org-mode)
+        (font-lock-flush)))))
 
 (defun nano-install-theme ()
   "Apply the NANO faces on top of the active theme."
@@ -306,6 +367,9 @@ before a graphical frame exists (for example under `emacs --daemon')."
 (add-hook 'doom-load-theme-hook #'nano-install-theme)
 (add-hook 'doom-load-theme-hook #'nano-install-labels)
 (add-hook 'doom-load-theme-hook #'nano-install-org-metadata)
+;; Appended (not prepended) so it runs after `nano-install-labels' above has
+;; already updated the nano-label-* colours the SVG tags read from.
+(add-hook 'doom-load-theme-hook #'nano-refresh-svg-todo-tags t)
 ;; org and org-modern both load lazily, after the theme. Until they do, their
 ;; faces do not exist and `nano-install-org-metadata' silently skips them, so
 ;; run it again once each is actually available.
