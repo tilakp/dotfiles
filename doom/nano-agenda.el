@@ -100,9 +100,8 @@
 
 ;; --- Useful functions -----------------------------------------------
 (defun center-string (string size)
-  (let* ((padding (/ (- size (length string)) 2))
-         (lpad padding)
-         (rpad (- padding)))
+  (let* ((lpad (max 0 (/ (- size (length string)) 2)))
+         (rpad (max 0 (- size (length string) lpad))))
     (concat (make-string lpad ?\ ) string (make-string rpad ?\ ))))
 
 ;; --- Nano-Agenda minor mode -----------------------------------------
