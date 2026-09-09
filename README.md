@@ -48,11 +48,29 @@ Check what you are about to add before adding it.
 ## Doom Emacs
 
 Doom itself lives in `~/.config/emacs` and is not tracked here; only the
-user config is. After changing `init.el` or `packages.el`:
+user config is. On a new machine, install Doom before running
+`install.sh` (or run `doom sync` right after):
+
+```sh
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+~/.config/emacs/bin/doom install
+```
+
+After changing `init.el` or `packages.el`:
 
 ```sh
 ~/.config/emacs/bin/doom sync
 ```
+
+The theme is tuned around two fonts set in `config.el` (`doom-font`,
+`doom-variable-pitch-font`) that are not installed by `doom sync` and are not
+tracked in this repo:
+
+- **Roboto Mono** -- free, e.g. `brew install --cask font-roboto-mono`
+- **Amazon Ember** -- Amazon-internal, obtained separately
+
+Without them Emacs silently falls back to a different font, and the spacing
+`nano-theme.el` assumes (line height, label padding) will be slightly off.
 
 Two things in `doom/` look like clutter but are not:
 
