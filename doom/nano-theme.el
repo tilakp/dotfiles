@@ -389,11 +389,11 @@ before a graphical frame exists (for example under `emacs --daemon')."
     (nano-link-face '(nano-salient)  '(font-lock-string-face
                                       font-lock-keyword-face))
     (nano-link-face '(nano-faded)    '(font-lock-comment-face
-                                      font-lock-doc-face))
-    (nano-link-face '(nano-popout)   '(font-lock-warning-face))
-    (nano-link-face '(nano-subtle)   '(font-lock-builtin-face
+                                      font-lock-doc-face
+                                      font-lock-builtin-face
                                       font-lock-constant-face
                                       font-lock-type-face))
+    (nano-link-face '(nano-popout)   '(font-lock-warning-face))
     
     ;; Org mode
     (nano-link-face '(nano-salient) '(org-link))
