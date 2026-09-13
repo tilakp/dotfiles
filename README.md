@@ -13,15 +13,38 @@ dotfiles/
 ## Install on a new machine
 
 ```sh
+# 1. Clone this repo
 git clone git@github.com:tilakp/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+
+# 2. Install Doom Emacs itself (not tracked here)
+git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+~/.config/emacs/bin/doom install
+
+# 3. Symlink this repo's configs into place
 ./install.sh --dry     # see what it would do
 ./install.sh
+
+# 4. Personal values (name, email, org file paths) aren't tracked -- fill them in
+cp doom/config.local.el.example doom/config.local.el
+$EDITOR doom/config.local.el
+
+# 5. Install the font the theme is tuned around
+brew install --cask font-roboto-mono
+
+# 6. Pull in packages and launch
+~/.config/emacs/bin/doom sync
+emacs
 ```
 
 `install.sh` is safe to re-run. A symlink already pointing at the right place
 is left alone. A real file in the way is moved to
 `~/.dotfiles-backup/<timestamp>/` rather than deleted.
+
+Steps 4 and 5 are both skippable and Emacs will still start: without step 4
+you get placeholder name/email and no org files configured; without step 5
+Emacs silently falls back to a different font, and the spacing
+`nano-theme.el` assumes (line height, label padding) will be slightly off.
 
 ## Adding something new
 
@@ -48,36 +71,11 @@ Check what you are about to add before adding it.
 ## Doom Emacs
 
 Doom itself lives in `~/.config/emacs` and is not tracked here; only the
-user config is. On a new machine, install Doom before running
-`install.sh` (or run `doom sync` right after):
-
-```sh
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
-~/.config/emacs/bin/doom install
-```
-
-After changing `init.el` or `packages.el`:
+user config is. After changing `init.el` or `packages.el`:
 
 ```sh
 ~/.config/emacs/bin/doom sync
 ```
-
-The theme is tuned around `doom-font` in `config.el` -- **Roboto Mono**
-(`brew install --cask font-roboto-mono`) -- which is not installed by
-`doom sync` and not tracked in this repo. Without it Emacs silently falls
-back to a different font, and the spacing `nano-theme.el` assumes (line
-height, label padding) will be slightly off.
-
-Name, email, and org file locations are personal, so `config.el` doesn't
-have them -- it loads `doom/config.local.el` instead, which is gitignored:
-
-```sh
-cp doom/config.local.el.example doom/config.local.el
-# then edit doom/config.local.el with your own name, email, and org paths
-```
-
-Without it, Emacs still starts, just with placeholder values and no org
-files configured.
 
 Two things in `doom/` look like clutter but are not:
 
