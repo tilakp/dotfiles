@@ -407,6 +407,13 @@ Leave nil to skip it entirely.")
 ;; Nano modeline configuration
 (use-package! doom-nano-modeline
   :config
+  ;; Today's date on the right side of the modeline, e.g. "Sep 12, 2026.
+  ;; Saturday". Re-evaluated on every redisplay, so it rolls over at
+  ;; midnight with no timer needed.
+  (setq doom-nano-modeline-append-information
+        (lambda ()
+          `((,(format-time-string "%b %-d, %Y. %A") . doom-nano-modeline-cursor-position-face)
+            (" " . nil))))
   (doom-nano-modeline-mode 1)
   (global-hide-mode-line-mode 1))
 
