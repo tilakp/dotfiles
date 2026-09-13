@@ -1,0 +1,20 @@
+;;; config.local.el.example -*- lexical-binding: t; -*-
+;;
+;; Copy this file to config.local.el (same directory) and fill in your own
+;; values. config.local.el is gitignored -- it never gets committed -- and
+;; config.el loads it automatically near the top, before anything else in
+;; that file relies on org-directory.
+
+(setq user-full-name "Your Name"
+      user-mail-address "you@example.com")
+
+(setq org-directory "~/org/"
+      org-roam-directory "~/org/roam/")
+
+;; Files org-focus-home / org-focus-work (C-c h / C-c w) narrow the agenda
+;; to. Paths relative to org-directory work fine here too.
+(setq org-focus-home-files (list (expand-file-name "home.org" org-directory)))
+(setq org-focus-work-files (list (expand-file-name "work.org" org-directory)))
+
+;; Optional: github.com/.../maclink, if you use it. Leave nil to skip.
+;; (setq my/maclink-file "~/workspace/maclink/contrib/maclink.el")

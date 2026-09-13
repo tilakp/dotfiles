@@ -68,6 +68,17 @@ The theme is tuned around `doom-font` in `config.el` -- **Roboto Mono**
 back to a different font, and the spacing `nano-theme.el` assumes (line
 height, label padding) will be slightly off.
 
+Name, email, and org file locations are personal, so `config.el` doesn't
+have them -- it loads `doom/config.local.el` instead, which is gitignored:
+
+```sh
+cp doom/config.local.el.example doom/config.local.el
+# then edit doom/config.local.el with your own name, email, and org paths
+```
+
+Without it, Emacs still starts, just with placeholder values and no org
+files configured.
+
 Two things in `doom/` look like clutter but are not:
 
 - `themes/doom-nano-{light,dark}-theme.el` are deliberate copies. The

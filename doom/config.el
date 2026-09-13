@@ -1,11 +1,29 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;; =============================================================================
-;; PERSONAL INFORMATION
+;; PERSONAL INFORMATION / LOCAL OVERRIDES
 ;; =============================================================================
+;; Name, email, and org file locations are personal, so they live in
+;; config.local.el instead -- gitignored, not tracked in this repo. Copy
+;; config.local.el.example to config.local.el and fill in your own values.
+;; The generic defaults below just let this config load (and find no org
+;; files) without it.
 
 (setq user-full-name "Your Name"
       user-mail-address "you@example.com")
+
+(setq org-directory "~/org/"
+      org-roam-directory "~/org/roam/")
+
+(defvar org-focus-home-files '("~/org/home.org")
+  "Org files considered \"home\" for `org-focus-home'.")
+(defvar org-focus-work-files '("~/org/work.org")
+  "Org files considered \"work\" for `org-focus-work'.")
+(defvar my/maclink-file nil
+  "Path to maclink.el's contrib file, if you use github.com/.../maclink.
+Leave nil to skip it entirely.")
+
+(load! "config.local" nil t) ;; noerror -- fine if you haven't created it
 
 ;; =============================================================================
 ;; FONT CONFIGURATION
@@ -58,9 +76,8 @@
 ;; ORG MODE - CORE SETTINGS
 ;; =============================================================================
 
-;; Directories
-(setq org-directory "~/org/"
-      org-roam-directory "~/org/roam/")
+;; org-directory / org-roam-directory are set at the top of this file
+;; (overridable from config.local.el).
 
 ;; Task dependencies - prevent marking parent as DONE if children aren't DONE
 (setq-default org-enforce-todo-dependencies t)
@@ -101,14 +118,8 @@
   "Display the NANO agenda." t)
 
 ;; Agenda file management functions
-(defvar org-focus-home-files
-  '("~/org/home/home.org"
-    "~/org/home/home-repair.org")
-  "Org files considered \"home\" for `org-focus-home'.")
-
-(defvar org-focus-work-files
-  '("~/org/work/work.org")
-  "Org files considered \"work\" for `org-focus-work'.")
+;; org-focus-home-files / org-focus-work-files are set at the top of this
+;; file (overridable from config.local.el).
 
 (defun org-focus-home ()
   "Narrow the agenda to home-related org files."
@@ -207,7 +218,7 @@
                 (,(format "%s\thome capture"
                           (all-the-icons-octicon "home" :face 'all-the-icons-green :v-adjust 0.01))
                  :keys "h"
-                 :file "~/org/home/home.org"
+                 :file ,(expand-file-name "home/home.org" org-directory)
                  :prepend t
                  :children
                  ((,(format "%s\thome todo"
@@ -215,18 +226,18 @@
                    :keys "t"
                    :headline "Inbox"
                    :todo-state "TODO"
-                   :template-file "~/org/templates/tpl-todo.txt")
+                   :template-file ,(expand-file-name "templates/tpl-todo.txt" org-directory))
                   (,(format "%s\tcapture email"
                             (all-the-icons-faicon "envelope" :face 'all-the-icons-blue :v-adjust 0.01))
                    :keys "e"
                    :prepend t
                    :headline "Inbox"
                    :type entry
-                   :template-file "~/org/templates/tpl-email.txt")
+                   :template-file ,(expand-file-name "templates/tpl-email.txt" org-directory))
                   (,(format "%s\tjournal entry"
                             (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01))
                    :keys "j"
-                   :file "~/org/home/home-journal.org"
+                   :file ,(expand-file-name "home/home-journal.org" org-directory)
                    :datetree t
                    :template "* %U - %^{Activity}")))
 
@@ -234,7 +245,7 @@
                 (,(format "%s\twork capture"
                           (all-the-icons-octicon "briefcase" :face 'all-the-icons-red :v-adjust 0.01))
                  :keys "w"
-                 :file "~/org/work/work.org"
+                 :file ,(expand-file-name "work/work.org" org-directory)
                  :prepend t
                  :children
                  ((,(format "%s\twork todo"
@@ -242,41 +253,41 @@
                    :keys "t"
                    :headline "Inbox"
                    :todo-state "TODO"
-                   :template-file "~/org/templates/tpl-todo.txt")
+                   :template-file ,(expand-file-name "templates/tpl-todo.txt" org-directory))
                   (,(format "%s\tjournal entry"
                             (all-the-icons-faicon "sticky-note" :face 'all-the-icons-yellow :v-adjust 0.01))
                    :keys "j"
-                   :file "~/org/work/work-journal.org"
+                   :file ,(expand-file-name "work/work-journal.org" org-directory)
                    :datetree t
                    :template "* %U - %?")
                   (,(format "%s\tcapture email"
                             (all-the-icons-faicon "envelope" :face 'all-the-icons-yellow :v-adjust 0.01))
                    :keys "e"
-                   :file "~/org/work/work.org"
+                   :file ,(expand-file-name "work/work.org" org-directory)
                    :prepend t
-                   :template-file "~/org/templates/tpl-email.txt")))
+                   :template-file ,(expand-file-name "templates/tpl-email.txt" org-directory))))
 
                 ;; General captures
                 (,(format "%s\tbook to read"
                           (all-the-icons-octicon "book" :face 'all-the-icons-green :v-adjust 0.02))
                  :keys "b"
-                 :file "~/org/books.org"
+                 :file ,(expand-file-name "books.org" org-directory)
                  :headline "Books to read"
                  :prepend t
-                 :template-file "~/org/templates/tpl-book.txt")
+                 :template-file ,(expand-file-name "templates/tpl-book.txt" org-directory))
 
                 (,(format "%s\tideas"
                           (all-the-icons-faicon "lightbulb-o" :face 'all-the-icons-yellow :v-adjust 0.02))
                  :keys "i"
-                 :file "~/org/ideas.org"
+                 :file ,(expand-file-name "ideas.org" org-directory)
                  :headline "Ideas"
                  :prepend t
-                 :template-file "~/org/templates/tpl-idea.txt")
+                 :template-file ,(expand-file-name "templates/tpl-idea.txt" org-directory))
 
                 (,(format "%s\tthoughts/observations"
                           (all-the-icons-faicon "bolt" :face 'all-the-icons-yellow :v-adjust 0.01))
                  :keys "o"
-                 :file "~/org/thoughts-and-observations-journal.org"
+                 :file ,(expand-file-name "thoughts-and-observations-journal.org" org-directory)
                  :datetree t
                  :template "* %U - %?")))))
 
@@ -303,7 +314,7 @@
 ;; optional sugar: maclink-insert-from-clipboard and a real `maclink' org
 ;; link type. See ~/workspace/maclink/README.md, "Using it from Emacs".
 
-(when (load! "~/workspace/maclink/contrib/maclink.el" nil t)
+(when (and my/maclink-file (load! my/maclink-file nil t))
   (map! :leader
         :prefix "n"
         :desc "maclink-insert-from-clipboard" "m" #'maclink-insert-from-clipboard))

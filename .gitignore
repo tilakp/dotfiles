@@ -1,6 +1,9 @@
 .DS_Store
 *.elc
 
+# Personal values (name, email, org file paths) -- see config.local.el.example
+doom/config.local.el
+
 # Local snapshots taken before edits. These can contain personal data
 # (org notes, credentials from other tools), so they never belong here.
 backup-*/
